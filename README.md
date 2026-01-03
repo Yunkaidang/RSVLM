@@ -40,10 +40,8 @@ MF-RSVLM is a remote sensing vision-language model (VLM). It combines a CLIP vis
 - [Training](#training)
 - [Inference Demos](#inference-demos)
 - [Evaluation](#evaluation)
-- [Checkpoint Notes](#checkpoint-notes)
 - [Citation](#citation)
-- [Acknowledgement](#acknowledgement)
-- [License](#license)
+
 
 ## Install
 ```bash
@@ -69,8 +67,7 @@ MF-RSVLM/
 ├── checkpoints/           # mf-rsvlm-7b_pretrained, mf-rsvlm-7b_sft
 ├── models/                # vicuna-7b-v1.5, clip-vit-large-patch14-336, llava-mlp2x
 ├── requirements.txt
-├── README.md
-└── mf-rsvlm_checkpoint_notes.md
+└── README.md
 ```
 
 ## Downloads
@@ -142,15 +139,6 @@ pip install -r requirements.txt
 ```
 
 Download the [model weights and datasets](#downloads), then follow the RSEvalKit README for one-click evaluation.
-
-## Checkpoint Notes
-For detailed training scripts and checkpoint notes, see `mf-rsvlm_checkpoint_notes.md`. Highlights:
-
-- Pretraining checkpoints default to `checkpoints/mf-rsvlm-7b_pretrained`
-- SFT checkpoints default to `checkpoints/mf-rsvlm-7b_sft*`
-- Slurm logs are written via `tee` into `scripts/rs/pretrain_*.log`
-- TensorBoard logs are under `checkpoints/<ckpt>/runs/`
-
 
 
 ## Citation
