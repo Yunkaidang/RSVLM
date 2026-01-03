@@ -77,16 +77,15 @@ MF-RSVLM/
 ### Models
 | Name | Link | Description |
 |---|---|---|
-| MF-RSVLM SFT | https://huggingface.co/FelixKAI/mfrsvlm-7b_sft | SFT stage LLM + MLP weights |
-| MF-RSVLM SFT (FitzPC) | https://huggingface.co/FitzPC/mf-rsvlm_7B | SFT stage LLM + MLP weights |
-| MF-RSVLM Pretrain (LLM + MLP) | https://huggingface.co/FitzPC/mf-rsvlm_7b_pretrain_mlp_llm/tree/main | Pretraining stage LLM + MLP |
-| MF-RSVLM Pretrain (CLIP) | https://huggingface.co/FitzPC/mf-rsvlm_7b_pretrain_vit | Pretraining stage vision tower |
-- LLaVA-1.5 MLP projector: https://huggingface.co/liuhaotian/llava-v1.5-mlp2x-336px-pretrain-vicuna-7b-v1.5/tree/main
+| MF-RSVLM Pretrain | https://huggingface.co/FelixKAI/mf_rsvlm_7b_pretrained | Pretrain stage |
+| MF-RSVLM SFT | https://huggingface.co/FelixKAI/mfrsvlm-7b_sft | SFT stage|
+| CLIP Pretrain | https://huggingface.co/openai/clip-vit-large-patch14-336 | Pretraining stage vision tower |
+| Vicuna-7B| https://huggingface.co/lmsys/vicuna-7b-v1.5 | Pretraining stage Language tower |
+| LLaVA-1.5 MLP Projector | https://huggingface.co/liuhaotian/llava-v1.5-mlp2x-336px-pretrain-vicuna-7b-v1.5/tree/main | MLP projector weights |
 
 ### Datasets
-- VersaD (pretraining): 1.4M image-text pairs. Prepare `list_pretrain.json` and set `DATA_DIR` and `LIST_FILE` in the script.
-- MF-RSVLM_SFT (instruction tuning): https://huggingface.co/datasets/FitzPC/MF-RSVLM_dataset_sft
-- RSVLM-SFT (instruction tuning): https://huggingface.co/datasets/FelixKAI/RSVLM-SFT
+- Pretrain data: https://huggingface.co/datasets/FitzPC/VHM_VersaD
+- SFT data: https://huggingface.co/datasets/FelixKAI/RSVLM-SFT
 
 
 ## Training
