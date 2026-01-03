@@ -1,80 +1,158 @@
+<h1 align="center">MF-RSVLM</h1>
+<p align="center">
+  <strong>FUSE-RSVLM: Feature Fusion Vision-Language Model for Remote Sensing</strong>
+</p>
 
+<p align="center">
+  <a href="https://arxiv.org/abs/2512.24022" target="_blank">
+    <img src="https://img.shields.io/badge/arXiv-2512.24022-B31B1B.svg" alt="arXiv Badge"/>
+  </a>
+  <a href="https://huggingface.co/FelixKAI/mfrsvlm-7b_sft" target="_blank">
+    <img src="https://img.shields.io/badge/HuggingFace-Model-yellow" alt="Hugging Face Model"/>
+  </a>
+  <a href="https://huggingface.co/datasets/FelixKAI/RSVLM-SFT" target="_blank">
+    <img src="https://img.shields.io/badge/HuggingFace-Dataset-yellow" alt="Hugging Face Dataset"/>
+  </a>
+  <img src="https://komarev.com/ghpvc/?username=Yunkaidang&color=blue" alt="GitHub Views"/>
+</p>
 
+<p align="center">
+  <a href="https://github.com/Yunkaidang/RSVLM">Project Page</a> |
+  <a href="https://arxiv.org/abs/2512.24022">Paper</a> |
+  <a href="https://huggingface.co/FelixKAI/mfrsvlm-7b_sft">Model</a> |
+  <a href="https://huggingface.co/datasets/FelixKAI/RSVLM-SFT">Dataset</a>
+</p>
 
+> If this project helps you, please give us a star on GitHub.
 
+## Overview
+MF-RSVLM is a remote sensing vision-language model (VLM). It combines a CLIP vision encoder, a two-layer MLP projector, and a Vicuna-7B LLM, and is trained in two stages for modality alignment and instruction following.
+
+- Visual Encoder: CLIP ViT-L/14 336px
+- Projector: 2-layer MLP
+- LLM: Vicuna-7B v1.5
+- Training: Pretrain (VersaD 1.4M image-text pairs) + SFT (instruction tuning)
 
 ## Contents
 - [Install](#install)
-- [Data](#data)
-- [Models](#model)
-- [Train](#train)
+- [Repository Layout](#repository-layout)
+- [Downloads](#downloads)
+- [Training](#training)
+- [Inference Demos](#inference-demos)
 - [Evaluation](#evaluation)
+- [Checkpoint Notes](#checkpoint-notes)
+- [Citation](#citation)
+- [Acknowledgement](#acknowledgement)
+- [License](#license)
+
 ## Install
-Refer to the following command for installation.
 ```bash
 git clone git@github.com:opendatalab/MF-RSVLM.git
 cd MF-RSVLM
-conda create -n mf-rsvlm 
+conda create -n mf-rsvlm
 conda activate mf-rsvlm
 pip install -r requirements.txt
 ```
 
+## Repository Layout
+```
+MF-RSVLM/
+├── mfrsvlm/               # package code
+│   ├── model/             # deepstack, builder, consolidate
+│   ├── train/             # train_mem.py, train.py, trainer
+│   ├── conversation.py
+│   ├── constants.py
+│   ├── mm_utils.py
+│   └── utils.py
+├── scripts/               # inference/eval/data-prep helpers + ZeRO configs
+│   └── data/
+├── checkpoints/           # mf-rsvlm-7b_pretrained, mf-rsvlm-7b_sft
+├── models/                # vicuna-7b-v1.5, clip-vit-large-patch14-336, llava-mlp2x
+├── requirements.txt
+├── README.md
+└── mf-rsvlm_checkpoint_notes.md
+```
 
-## Models
-MF-RSVLM consists of a visual encoder, a projector layer, and a large language model (LLM). The visual encoder uses a pretrained [CLIP-14-336px](https://huggingface.co/openai/clip-vit-large-patch14-336), the projector layer is composed of two MLP layers, and the LLM is based on the pretrained [Vicuna-7B](https://huggingface.co/lmsys/vicuna-7b-v1.5). The model is trained in two stages, as shown in the diagram below.
+## Downloads
+### Models
+| Name | Link | Description |
+|---|---|---|
+| MF-RSVLM SFT | https://huggingface.co/FelixKAI/mfrsvlm-7b_sft | SFT stage LLM + MLP weights |
+| MF-RSVLM SFT (FitzPC) | https://huggingface.co/FitzPC/mf-rsvlm_7B | SFT stage LLM + MLP weights |
+| MF-RSVLM Pretrain (LLM + MLP) | https://huggingface.co/FitzPC/mf-rsvlm_7b_pretrain_mlp_llm/tree/main | Pretraining stage LLM + MLP |
+| MF-RSVLM Pretrain (CLIP) | https://huggingface.co/FitzPC/mf-rsvlm_7b_pretrain_vit | Pretraining stage vision tower |
+- LLaVA-1.5 MLP projector: https://huggingface.co/liuhaotian/llava-v1.5-mlp2x-336px-pretrain-vicuna-7b-v1.5/tree/main
 
-![](docs/images/mf-rsvlm_train_stage.png)
+### Datasets
+- VersaD (pretraining): 1.4M image-text pairs. Prepare `list_pretrain.json` and set `DATA_DIR` and `LIST_FILE` in the script.
+- MF-RSVLM_SFT (instruction tuning): https://huggingface.co/datasets/FitzPC/MF-RSVLM_dataset_sft
+- RSVLM-SFT (instruction tuning): https://huggingface.co/datasets/FelixKAI/RSVLM-SFT
 
 
-We provide not only the weights after the SFT stage but also the Pretrained weights.
+## Training
+MF-RSVLM training has two stages: pretraining for modality alignment, and supervised fine-tuning (SFT) for instruction following.
 
-| Name | Description|
-|---|---|
-|[MF-RSVLM_sft](https://huggingface.co/FitzPC/mf-rsvlm_7B) | The LLM and MLP weights obtained from the SFT stage| 
-|[MF-RSVLM_pretrain](https://huggingface.co/FitzPC/mf-rsvlm_7b_pretrain_mlp_llm/tree/main) | The LLM and MLP weights obtained from the Pretraining stage.|
-|[CLIP_pretrain](https://huggingface.co/FitzPC/mf-rsvlm_7b_pretrain_vit)|The CLIP weights obtained from the  Pretraining stage.|
-
-
-## Train
-MF-RSVLM model training consists of two stages: (1) Pretrain stage: use our VersaD dataset with 1.4M image-text pairs to finetune the vision encoder, projector, and the LLM to align the textual and visual modalities; (2) Supervised Fine-Tuning（SFT） stage: finetune the projector and LLM to teach the model to follow multimodal instructions. 
 ### Pretrain
-First, you should download the [MLP projector](https://huggingface.co/liuhaotian/llava-v1.5-mlp2x-336px-pretrain-vicuna-7b-v1.5/tree/main) pretrained by LLaVA-1.5. Because a rough modality alignment process is beneficial before using high quality detailed captions for modality alignment.
-
-You can run `sh scripts/rs/slurm_pretrain.sh` to pretrain the model. Remember to specify the projector path in the script. In this stage, we fine-tuned the second half of the vision encoder's blocks, projector, and LLM.
-
-In our setup we used 16 A100 (80G) GPUs and the whole pre-training process lasted about 10 hours. You can adjust the number of gradient accumulation steps to reduce the number of GPUs.
-
-In the `sh scripts/rs/slurm_pretrain.sh`, you need to revise three paths:
+Run the Slurm script below to start pretraining:
 ```bash
-DATA_DIR=pretrain_base # directory of VersaD dataset
-export LIST_FILE=${DATA_DIR}/list_pretrain.json # json file of VersaD data  
-export CKPT_PATH=weight_path # llava-1.5 MLP weight path
-export SAVE_PATH=mf-rsvlm-7b_pretrained # file save path
+sh scripts/rs/slurm_pretrain.sh
 ```
+
 ### Supervised Fine-Tuning
-In this stage, we finetune the projector and LLM with our [MF-RSVLM_SFT](https://huggingface.co/datasets/FitzPC/MF-RSVLM_dataset_sft) dataset. 
-
-In our setup we used 8 A100 (80G) GPUs and the whole sft process lasted about 4 hours. You can adjust the number of gradient accumulation steps to reduce the number of GPUs.
-
-You can run `sh scripts/rs/slurm_finetune.sh` to finetune the model, and you need to revise three paths:
+Run the Slurm script below to start SFT:
 ```bash
-DATA_DIR=sft_base # directory of mf-rsvlm-sft dataset
-export LIST_FILE=${DATA_DIR}/list_sft.json # json file of sft data  
-CKPT=mf-rsvlm-7b_pretrained # pretrain weight path
-export SAVE_PATH=mf-rsvlm-7b_sft # file save path
+sh scripts/rs/slurm_finetune.sh
 ```
 
-## Evaluation 
-In order to facilitate the use of remote sensing vision-language large models, we have developed a specialized evaluation project [RSEvalKit](https://github.com/fitzpchao/RSEvalKit) for remote sensing large models. Please refer to the following command for installation.
+## Inference Demos
+### Single-Sample Inference (CLI)
+Use the lightweight helper to test a single image-question pair. This script loads the model once and prints the response directly in the terminal.
 
-```sh
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/run_mfrsvlm_inference.py \
+  --model-path checkpoints/mfrsvlm-7b_sft \
+  --image-path /path/to/image.png \
+  --prompt "What is shown in the image?"
+```
+
+
+### Web Demo (Full-Model UI)
+Start a simple Flask web interface for interactive evaluation. The server loads the checkpoint once, then serves a browser UI for repeated queries.
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/run_mf-rsvlm_web_server.py \
+  --model-path checkpoints/mfrsvlm-7b_sft \
+  --host 0.0.0.0 \
+  --port 7860
+```
+
+Open `http://localhost:7860` in your browser, upload an image, and enter a question to get the model response.
+
+**Web UI Result**
+![Web UI Result](asserts/result.png)
+
+## Evaluation
+We provide a dedicated evaluation toolkit: [RSEvalKit](https://github.com/fitzpchao/RSEvalKit).
+
+```bash
 git clone https://github.com/fitzpchao/RSEvalKit
 cd RSEvalKit
 conda create -n rseval
 conda activate rseval
 pip install -r requirements.txt
 ```
-All evaluation tasks for this paper are implemented in RSEval  and can be evaluated with one click. First, you need to download our [model weights](#models) and [MF-RSVLM_Eval data](docs/Data.md#MF-RSVLM_Eval-Dataset ), then follow the [instructions](https://github.com/fitzpchao/RSEvalKit/blob/master/README.md) to complete the evaluation.
+
+Download the [model weights and datasets](#downloads), then follow the RSEvalKit README for one-click evaluation.
+
+## Checkpoint Notes
+For detailed training scripts and checkpoint notes, see `mf-rsvlm_checkpoint_notes.md`. Highlights:
+
+- Pretraining checkpoints default to `checkpoints/mf-rsvlm-7b_pretrained`
+- SFT checkpoints default to `checkpoints/mf-rsvlm-7b_sft*`
+- Slurm logs are written via `tee` into `scripts/rs/pretrain_*.log`
+- TensorBoard logs are under `checkpoints/<ckpt>/runs/`
+
+
 
 ## Citation
 ```bibtex
@@ -87,12 +165,9 @@ All evaluation tasks for this paper are implemented in RSEval  and can be evalua
 ```
 
 ## Acknowledgement
-We gratefully acknowledge these wonderful works：
+We gratefully acknowledge these wonderful works:
 - [Vicuna](https://github.com/lm-sys/FastChat#vicuna-weights)
 - [LLaVA](https://github.com/haotian-liu/LLaVA)
 - [ShareGPT4V](https://github.com/InternLM/InternLM-XComposer/tree/main/projects/ShareGPT4V)
 - [LLaMA](https://github.com/facebookresearch/llama)
-
-## License
-
-![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg) ![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg) **Usage and License Notices**: The data and checkpoint is intended and licensed for research use only. They are also restricted to uses that follow the license agreement of LLaMA, Vicuna and Gemini. The dataset is CC BY NC 4.0 (allowing only non-commercial use) and models trained using the dataset should not be used outside of research purposes.
+- [VHM](https://github.com/opendatalab/VHM)
