@@ -78,14 +78,11 @@ All evaluation tasks for this paper are implemented in RSEval  and can be evalua
 
 ## Citation
 ```bibtex
-@misc{pang2024mfrsvlmversatilehonestvision,
-      title={MF-RSVLM: Versatile and Honest Vision Language Model for Remote Sensing Image Analysis}, 
-      author={Chao Pang and Xingxing Weng and Jiang Wu and Jiayu Li and Yi Liu and Jiaxing Sun and Weijia Li and Shuai Wang and Litong Feng and Gui-Song Xia and Conghui He},
-      year={2024},
-      eprint={2403.20213},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2403.20213}, 
+@article{dang2025fuse,
+  title={FUSE-RSVLM: Feature Fusion Vision-Language Model for Remote Sensing},
+  author={Dang, Yunkai and Wang, Donghao and Yang, Jiacheng and Jiang, Yifan and Zhu, Meiyi and Yang, Yuekun and Wang, Cong and Fan, Qi and Li, Wenbin and Gao, Yang},
+  journal={arXiv preprint arXiv:2512.24022},
+  year={2025}
 }
 ```
 
